@@ -1,0 +1,75 @@
+input[type="range"].multirange {
+    width: 200px;
+}
+
+.range {
+    display: flex;
+    justify-content: space-between;
+    width: 200px;
+    font-family: Helvetica;
+    font-size: 13px;
+}
+
+input[type="range"].multirange {
+    padding: 0;
+    --range-color: #3a0647;
+    margin: 0;
+    display: inline-block;
+    vertical-align: top;
+    -webkit-appearance: none;
+    appearance: none;
+    outline: none;
+}
+
+    input[type="range"].multirange.original {
+        position: absolute;
+    }
+
+    input[type="range"].multirange::-webkit-slider-runnable-track {
+        background: linear-gradient(to right, #ddd, #ddd) no-repeat 0 50% / 100% 20%;
+    }
+
+    input[type="range"].multirange.original::-webkit-slider-thumb {
+        position: relative;
+        z-index: 2;
+    }
+
+    input[type="range"].multirange::-webkit-slider-thumb {
+        position: relative;
+        z-index: 2;
+        -webkit-appearance: none;
+        border-radius: 15px;
+        border: none;
+        display: block;
+        background: var(--range-color);
+        height: 15px;
+        width: 15px;
+    }
+
+    input[type="range"].multirange.original::-moz-range-thumb {
+        transform: scale(1); /* FF doesn't apply position it seems */
+        z-index: 1;
+    }
+
+    input[type="range"].multirange::-moz-range-track {
+        border-color: transparent; /* needed to switch FF to "styleable" control */
+    }
+
+    input[type="range"].multirange.ghost {
+        position: relative;
+        background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0 ) no-repeat 0 50% / 100% 20%;
+    }
+
+        input[type="range"].multirange.ghost::-webkit-slider-runnable-track {
+            background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0 ) no-repeat 0 50% / 100% 20%;
+        }
+
+        input[type="range"].multirange.ghost::-moz-range-track {
+            background: linear-gradient(to right, transparent var(--low), var(--range-color) 0, var(--range-color) var(--high), transparent 0 ) no-repeat 0 45% / 100% 40%;
+        }
+.lowDollarAmount{
+    color:black;
+}
+.highDollarAmount{
+    color:black;
+}

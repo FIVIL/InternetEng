@@ -1,0 +1,235 @@
+﻿@using InternetProject.Shared;
+@using InternetProject.Models;
+@using InternetProject.ViewModels;
+@using static InternetProject.Client.Statics;
+@inject Microsoft.AspNetCore.Blazor.Services.IUriHelper UriHelper;
+@inject HttpClient Http
+@inherits BlazorLayoutComponent
+<div class="sidebar">
+    <NavMenu>
+        <div class="navbar-brand">
+            @{
+                if (!IsLogin)
+                {
+                    @*<a href="/" class="logintetx">
+                            <span class="glyphicon glyphicon-lock"></span>
+                            &ensp;
+                            <strong><i>Login...</i></strong>
+                        </a>*@
+                    <button onclick="@ShowSignIn" class="buttonLogin">Login...</button>
+                }
+                else
+                {
+                    <strong class="logintetx"><i>Welcome @LoginName &emsp;</i></strong>
+                    <a href="/" class="logintetx">
+                        <img src="../img/signout.svg" class="icon" onclick="@logout" title="Sign Out" />
+                    </a>
+                };
+
+            }
+        </div>
+    </NavMenu>
+</div>
+<div class="progress-header">
+    <div class="progress-container">
+        <div class="progress-bar" id="myBar"></div>
+    </div>
+</div>
+<div class="main">
+    <div class="content px-4">
+        @Body
+    </div>
+    <footer />
+    <div>
+        <!-- The Modal -->
+        <div id="id01" class="modal">
+            <span onclick="@ModalNone"
+                  class="close" title="Close Modal">&times;</span>
+            <center>
+                <!-- Modal Content -->
+                <form class="modal-content animate">
+                    <br />
+                    <div>
+                        <label for="uname"><b>Username:</b></label>
+                        <input type="text" placeholder="Enter Username" name="uname" required class="smalbox" bind="@loginvm.UserName" />
+                        <hr />
+                        <label for="psw"><b>Password:</b></label>
+                        <input type="password" placeholder="Enter Password" name="psw" required class="smalbox" bind="@loginvm.PassWord" />
+                    </div>
+                    <br />
+                    <div class="container" style="background-color:#f1f1f1">
+                        <button type="button" onclick="@SignInAsync" class="cancelbtn">Sign in</button>
+                        &emsp;&emsp;
+                        <button type="button" onclick="@ShowSignUp" class="cancelbtn">Sign up</button>
+                        <br />
+                    </div>
+                    <br />
+                </form>
+            </center>
+        </div>
+        <div id="id02" class="modal">
+            <span onclick="@ModalNone"
+                  class="close" title="Close Modal">&times;</span>
+            <center>
+                <!-- Modal Content -->
+                <form class="modal-content animate">
+                    <br />
+                    <div>
+                        <label for="nname"><b>Name:</b></label>
+                        <br />
+                        <input type="text" placeholder="Enter Name" name="nname" required class="smalbox" bind="@reg.Name" />
+                        <hr />
+                        <label for="lname"><b>Last Name:</b></label>
+                        <br />
+                        <input type="text" placeholder="Enter Last Name" name="lname" required class="smalbox" bind="@reg.LastName" />
+                        <hr />
+                        <label for="unname"><b>Username:</b></label>
+                        <br />
+                        <input type="text" placeholder="Enter Username" name="unname" required class="smalbox" bind="@reg.UserName" />
+                        <hr />
+                        <label for="psww"><b>Password:</b></label>
+                        <br />
+                        <input type="password" placeholder="Enter Password" name="psww" required class="smalbox" bind="@reg.Password" />
+                        <hr />
+                        <label for="repas"><b>Repeat Password:</b></label>
+                        <br />
+                        <input type="password" placeholder="Repeat Password" name="repas" required class="smalbox" bind="@repass" />
+                        <hr />
+                        <label for="nemail"><b>Email:</b></label>
+                        <br />
+                        <input type="email" placeholder="Enter Email" name="nemail" required class="smalbox" bind="@reg.Email" />
+                        <hr />
+                        <label for="nphone"><b>Phone Number:</b></label>
+                        <br />
+                        <input type="text" placeholder="Enter Phone Number" name="nphone" required class="smalbox" bind="@reg.PhoneNumber" pattern="09(1[0-9]|3[1-9]|2[1-9])-?[0-9]{3}-?[0-9]{4}" />
+                        <hr />
+                        <label for="city"><b>City Name:</b></label>
+                        <br />
+                        <select name="city" class="smalbox" onclick="@CitiesAsync" bind="@cityID">
+                            @{
+                                if (cities != null)
+                                {
+                                    <option value="NaN">----Select----</option>
+                                    foreach (var item in cities)
+                                    {
+                                        <option value="@item.ID">@item.Name</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="NaN">----Select----</option>
+                                };
+                            }
+                        </select>
+                    </div>
+                    <br />
+                    <div class="container" style="background-color:#f1f1f1">
+                        <button type="button" onclick="@SignUpAsync" class="cancelbtn">Sign up</button>
+                        &emsp;&emsp;
+                        <button type="button" onclick="@ShowSignIn" class="cancelbtn">Sign in</button>
+                        <br />
+                    </div>
+                    <br />
+                </form>
+            </center>
+        </div>
+    </div>
+</div>
+@functions{
+    string cityID = string.Empty;
+    string Cookie = string.Empty;
+    CheckSessionResult CheckSession;
+    CheckSessionResult res;
+    LoginViewModel loginvm = new LoginViewModel();
+    Account reg = new Account();
+    string repass = string.Empty;
+    IList<CityName> cities;
+    protected override async Task OnInitAsync()
+    {
+        Cookie = GetCookie();
+        if (Cookie != string.Empty)
+        {
+            CheckSession = await Http.GetJsonAsync<CheckSessionResult>("api/Account/session/" + Cookie);
+            IsLogin = CheckSession.res;
+            LoginName = CheckSession.Name;
+            if (IsLogin) Toast($"Welcome {LoginName} !!!", ToastType.Sucess);
+            else ClearCookie();
+        }
+    }
+    async Task CitiesAsync()
+    {
+        if (cities == null)
+            cities = await Http.GetJsonAsync<IList<CityName>>("api/Account/cities");
+    }
+    void ModalNone()
+    {
+        Modal("id01", ModalType.None);
+        Modal("id02", ModalType.None);
+    }
+    async Task SignInAsync()
+    {
+        res = await Http.SendJsonAsync<CheckSessionResult>(HttpMethod.Post, "/api/Account/signin", loginvm);
+        if (res.Name.Equals("Not Found"))
+        {
+            ModalNone();
+            Toast("Wrong username or password!!!", ToastType.Error);
+        }
+        else
+        {
+            var ps = res.Name.Split(';');
+            IsLogin = true;
+            LoginName = ps[0];
+            SetCookie(ps[1]);
+            ModalNone();
+            if (ps[2] == "T")
+            {
+                IsAdmin = true;
+                Token = Guid.Parse(ps[3]);
+            }
+            Toast($"Welcome {LoginName} !!!", ToastType.Sucess);
+        }
+    }
+    async Task SignUpAsync()
+    {
+        if (reg.Password == repass)
+        {
+            try
+            {
+                reg.CityID = Guid.Parse(cityID);
+                res = await Http.SendJsonAsync<CheckSessionResult>(HttpMethod.Post, "/api/Account/signup", reg);
+                SetCookie(res.Name);
+                IsLogin = true;
+                LoginName = reg.UserName;
+                Toast("successfully registered!!!", ToastType.Sucess);
+                ModalNone();
+            }
+            catch
+            {
+                Toast("invalide data", ToastType.Error);
+            }
+
+        }
+        else Toast("password and repeated password mismatch", ToastType.Error);
+
+    }
+    async Task logout()
+    {
+        await Http.GetJsonAsync<CheckSessionResult>("api/Account/ClearSession/" + GetCookie());
+        ClearCookie();
+        IsLogin = false;
+        LoginName = string.Empty;
+        IsAdmin = false;
+        Token = Guid.Empty;
+        Toast("Loged Out!!!", ToastType.Warning);
+    }
+    void ShowSignUp()
+    {
+        Modal("id01", ModalType.None);
+        Modal("id02", ModalType.Block);
+    }
+    void ShowSignIn()
+    {
+        Modal("id01", ModalType.Block);
+        Modal("id02", ModalType.None);
+    }
+}

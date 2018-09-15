@@ -1,0 +1,465 @@
+﻿@page "/Search";
+@page "/Search/{name}";
+@using System.Linq;
+@using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using InternetProject.ViewModels;
+@using InternetProject.Models;
+@using static InternetProject.Client.Statics;
+@implements IDisposable;
+@inject HttpClient Http
+<h1>
+    <i>
+        <img src="../img/search.jpg" style="width:45px;height:45px;" />
+        Search...
+    </i>
+</h1>
+<hr />
+<div>
+    <div class="row">
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="brand">Brand:</label>
+                @{
+                    @*if (!string.IsNullOrEmpty(imgpath))
+                        {
+                            var path = $"../img/car logos/{imgpath}.png";
+                            <img src="@path" class="SearchImage" title="@imgname" />
+                        };*@
+                    <br />
+                    <select name="brand" class="SearchInput" bind="@BrandID" onclick="@GetBrands">
+                        @if (Brands == null)
+                        {
+                            if (string.IsNullOrEmpty(imgname))
+                            {
+                                <option value="@Guid.Empty">----Select----</option>
+                            }
+                            else
+                            {
+                                <option value="@_brandId">@imgname</option>
+                            }
+                        }
+                        else
+                        {
+                            <option value="@Guid.Empty">----Select----</option>
+                            foreach (var item in Brands)
+                            {
+                                <option value="@item.ID">@item.Name</option>
+                            }
+                        }
+                    </select>
+                }
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="CarName">Name:</label>
+                <br />
+                <input type="text" bind="@carName" name="CarName" class="SearchInput" />
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="fueltype">Fuel:</label>
+                <br />
+                <select name="fueltype" class="SearchInput" bind="@fueltype">
+                    <option value="-100">----Select----</option>
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(FuelType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="Gbox">Gear Box:</label>
+                <br />
+                <select name="Gbox" class="SearchInput" bind="@gbox">
+                    <option value="-100">----Select----</option>
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(GearboxType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <!-- -->
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="CClass">Class:</label>
+                <br />
+                <select name="CClass" class="SearchInput" bind="@carcalss">
+                    <option value="-100">----Select----</option>
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(CarClassType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="FHAnded">First Handed:</label>
+                <br />
+                <select name="FHAnded" class="SearchInput" bind="@fh">
+                    <option value="-100">----Select----</option>
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="Havpic">Picture:</label>
+                <br />
+                <select name="Havpic" class="SearchInput" bind="@hp">
+                    <option value="-100">----Select----</option>
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="PLL">Planned Sell:</label>
+                <br />
+                <select name="PLL" class="SearchInput" bind="@planned">
+                    <option value="-100">----Select----</option>
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        <!-- -->
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="PPrice">Price:</label>
+                <small class="SearchRangeIndicator" id="PriceRanges">From: NULL To: NULL</small>
+                <br />
+                <center>
+                    <input id="sliderPrice" type="range" multiple value="0,1000" name="PPrice" min="0" max="1000" />
+                </center>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="Myear">Manufacturing Year:</label>
+                <small class="SearchRangeIndicator" id="MyearRanges">From: NULL To: NULL</small>
+                <br />
+                <center>
+                    <input id="sliderMYear" type="range" multiple value="0,50" name="Myaer" min="0" max="50" />
+                </center>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="KMM">Distance:</label>
+                <small class="SearchRangeIndicator" id="KMRanges">From: NULL To: NULL (km)</small>
+                <br />
+                <center>
+                    <input id="sliderKM" type="range" multiple value="0,1000" name="KMM" min="0" max="1000" />
+                </center>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <br />
+                <strong style="float:left;cursor:pointer" onclick="@GridToTable">Show Type: @GridOrTable</strong>
+                <button class="Searchbutton" onclick="@SearchFunction">Search...</button>
+            </div>
+        </div>
+    </div>
+</div>
+@if (!searchflag)
+{
+    <hr />
+    for (int i = 0; i < 10; i++)
+    {
+        <br />
+    }
+}
+else
+{
+    if (Ads == null)
+    {
+        <hr />
+        <wait />
+        for (int i = 0; i < 10; i++)
+        {
+            <br />
+        }
+    }
+    else
+    {
+        <br />
+        if (!table)
+        {
+            <hr />
+            <div class="row">
+                @foreach (var item in Ads)
+                {
+                    var pathh = string.Empty;
+                    if (item.Images.Count != 0)
+                    {
+                        pathh = $"data:image/jpg;base64,{item.Images.ElementAt(0).Value}";
+                    }
+                    else { pathh = "../img/no-image.png"; }
+                    var hrefValue = $"/AdDetailes/{ToBase64(item.ID)}";
+                    <a href="@hrefValue" class="col-md-4">
+                        <div class="SearchResultItem">
+                            <div class="innerSearch row">
+                                <div class="col-md-4">
+                                    <img src="@pathh" class="SearchImageCar" />
+                                </div>
+                                <div class="col-md-8">
+                                    <small class="SearchLeft">Name:</small>
+                                    <small class="SearchRight">@item.Car.CarName</small>
+                                    <br />
+                                    <small class="SearchLeft">Brand:</small>
+                                    @{ var path = $"../img/car logos/{item.Car.Brand.ImgPath}.png";}
+                                    <div class="SearchRight">
+                                        <img src="@path" class="CarImagePreview" />
+                                        <small style="float:right">@item.Car.Brand.Name</small>
+                                    </div>
+                                    <br />
+                                    <small class="SearchLeft">Distance Traveled:</small>
+                                    <small class="SearchRight">@item.KM (km)</small>
+                                    <br />
+                                    <small class="SearchLeft">Color:</small>
+                                    <div class="SearchRight">
+                                        <div class="CarColorPreView" style="background-color:@item.Color.Code"></div>
+                                        <small style="float:right">@item.Color.Color</small>
+                                    </div>
+                                    <br />
+                                    <small class="SearchLeft">Price:</small>
+                                    <small class="SearchRight">@item.Price</small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="cursor:pointer"
+                            onclick="@(()=> {nname = !nname;Ads= (nname) ? Ads.OrderBy(x => x.Car.CarName).ToList() :  Ads.OrderByDescending(x => x.Car.CarName).ToList(); })">Name@((nname) ? "˄" : "˅")</th>
+                            <th style="cursor:pointer"
+                                onclick="@(()=> {Ads= (brand) ? Ads.OrderBy(x => x.Car.Brand.Name).ToList() :  Ads.OrderByDescending(x => x.Car.Brand.Name).ToList();brand = !brand; })">Brand@((brand) ? "˄" : "˅")</th>
+                                <th style="cursor:pointer"
+                                    onclick="@(()=> {Ads= (dtkm) ? Ads.OrderBy(x => x.KM).ToList() :  Ads.OrderByDescending(x => x.KM).ToList();dtkm = !dtkm; })">Distance Traveled. (km) @((dtkm) ? "˄" : "˅")</th>
+                                    <th>Color</th>
+                                    <th style="cursor:pointer"
+                                        onclick="@(()=> {Ads= (pr) ? Ads.OrderBy(x => x.Price).ToList() :  Ads.OrderByDescending(x => x.Price).ToList();pr = !pr; })">Price @((pr) ? "˄" : "˅")</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Ads)
+                                    {
+                                        var hrefValue = $"/AdDetailes/{ToBase64(item.ID)}";
+                                        <tr>
+                                            <td>@item.Car.CarName</td>
+                                            <td>@item.Car.Brand.Name</td>
+                                            <td>@item.KM</td>
+                                            <td>
+                                                <div class="CarColorPreViewTable" style="background-color:@item.Color.Code"></div>
+                                                <text style="float:left">@item.Color.Color</text>
+                                            </td>
+                                            <td>@item.Price</td>
+                                            <td><a href="@hrefValue">Details</a></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        }
+                    }
+                }
+@functions{
+    [Parameter]
+    string name { get; set; }
+    bool nname = false, brand = false, dtkm = false, pr = false;
+    string imgpath = string.Empty;
+    string imgname = string.Empty;
+    bool searchflag = false;
+    SearchViewModel SVM = new SearchViewModel();
+    string carName = string.Empty;
+    int index = 0;
+    int fueltype = -100;
+    int carcalss = -100;
+    int gbox = -100;
+    int fh = -100;
+    int hp = -100;
+    int planned = -100;
+    List<Ad> Ads;
+    List<Ad> NewAds;
+    int NewFinded = 0;
+    IList<CarBrand> Brands;
+    Guid _brandId;
+    string BrandID { get => _brandId.ToString(); set => _brandId = Guid.Parse(value); }
+    bool CanSearch = false;
+    bool table = false;
+    string GridOrTable = "Grid";
+    protected override void OnInit()
+    {
+        SVM.OnPropertyChange += () =>
+        {
+            if (Ads != null) Ads.Clear();
+            CanSearch = false;
+        };
+        SVM.Skip = -1;
+        OnScroll += LoadMore;
+        if (!string.IsNullOrEmpty(name))
+        {
+            var s = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(name));
+            var p = s.Split(';');
+            if (p[0] == "00")
+            {
+                _brandId = Guid.Parse(p[1]);
+                imgpath = p[3];
+                imgname = p[2];
+            }
+        }
+    }
+    async Task GetBrands()
+    {
+        if (Brands == null)
+        {
+            Brands = await Http.GetBrands();
+        }
+    }
+    async Task SearchFunction()
+    {
+        searchflag = true;
+
+        if (_brandId != Guid.Empty) SVM.Brand = _brandId;
+        else SVM.Brand = null;
+
+        SVM.CarName = carName;
+
+        SVM.Skip = 0;
+
+        if (fueltype != -100) SVM.Fuel = (FuelType)fueltype;
+        else SVM.Fuel = null;
+
+        if (carcalss != -100) SVM.CarClass = (CarClassType)carcalss;
+        else SVM.CarClass = null;
+
+        if (gbox != -100) SVM.Gearbox = (GearboxType)gbox;
+        else SVM.Gearbox = null;
+
+        if (fh == 0) SVM.FirstHanded = true;
+        else if (fh == 1) SVM.FirstHanded = false;
+        else SVM.FirstHanded = null;
+
+        if (hp == 0) SVM.HavePic = true;
+        else if (hp == 1) SVM.HavePic = false;
+        else SVM.HavePic = null;
+
+        if (planned == 0) SVM.Planned = true;
+        else if (planned == 1) SVM.Planned = false;
+        else SVM.Planned = null;
+
+        SVM.PriceS = null;
+        SVM.PriceE = null;
+        var r = RegisteredFunction.Invoke<string>("GetSliderValue", "sliderPrice");
+        if (r != "0;0")
+        {
+            var rr = r.Split(';');
+            if (rr[0] != rr[1])
+            {
+                var HH = int.Parse(rr[0]);
+                var LL = int.Parse(rr[1]);
+                SVM.PriceS = (LL * 1000000) + 10000000;
+                SVM.PriceE = (HH * 1000000) + 10000000;
+            }
+        }
+
+        SVM.MYearStart = null;
+        SVM.MYearEnd = null;
+        r = RegisteredFunction.Invoke<string>("GetSliderValue", "sliderMYear");
+        if (r != "0;0")
+        {
+            var rr = r.Split(';');
+            if (rr[0] != rr[1])
+            {
+                var HH = int.Parse(rr[0]);
+                var LL = int.Parse(rr[1]);
+                SVM.MYearStart = LL + 1970;
+                SVM.MYearEnd = HH + 1970;
+            }
+        }
+
+        SVM.KME = null;
+        SVM.KMS = null;
+        r = RegisteredFunction.Invoke<string>("GetSliderValue", "sliderKM");
+        if (r != "0;0")
+        {
+            var rr = r.Split(';');
+            if (rr[0] != rr[1])
+            {
+                var HH = int.Parse(rr[0]);
+                var LL = int.Parse(rr[1]);
+                SVM.KMS = LL * 1000;
+                SVM.KME = HH * 1000;
+            }
+        }
+        if (NewAds == null && !CanSearch)
+        {
+            if (Ads == null) Ads = new List<Ad>();
+            NewAds = await Http.SendJsonAsync<List<Ad>>(HttpMethod.Post, "api/Car/Search", SVM);
+            Ads.AddRange(NewAds);
+            NewFinded = NewAds.Count;
+            NewAds = null;
+            CanSearch = true;
+            Toast($"{NewFinded} New result founded.", ToastType.Sucess);
+        }
+    }
+    protected override void OnAfterRender()
+    {
+
+        RegisteredFunction.Invoke<bool>("MultiSliderActive");
+        RegisteredFunction.Invoke<bool>("SliderBinder", "sliderPrice", "PriceRanges", 1000000, 10000000);
+        RegisteredFunction.Invoke<bool>("SliderBinder", "sliderMYear", "MyearRanges", 1, 1970);
+        RegisteredFunction.Invoke<bool>("SliderBinder", "sliderKM", "KMRanges", 1000, 0);
+    }
+    private void GridToTable()
+    {
+        table = !table;
+        if (GridOrTable == "Grid") GridOrTable = "Table";
+        else GridOrTable = "Grid";
+    }
+    async Task LoadMore()
+    {
+        if (SVM.Skip > -1)
+        {
+            Toast("Loading More Ads....", ToastType.Warning);
+            SVM.Skip++;
+            if (NewAds == null && NewFinded != 0)
+            {
+                if (Ads == null) Ads = new List<Ad>();
+                NewAds = await Http.SendJsonAsync<List<Ad>>(HttpMethod.Post, "api/Car/Search", SVM);
+                Ads.AddRange(NewAds);
+                NewFinded = NewAds.Count;
+                NewAds = null;
+                Toast($"{NewFinded} New result founded.", ToastType.Sucess);
+
+            }
+        }
+
+    }
+    public void Dispose()
+    {
+        OnScroll -= LoadMore;
+    }
+}

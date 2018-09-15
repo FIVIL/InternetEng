@@ -1,0 +1,226 @@
+﻿@page "/AdDetailes";
+@page "/AdDetailes/{name}";
+@using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using InternetProject.ViewModels;
+@using InternetProject.Models;
+@using static InternetProject.Client.Statics;
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Blazor.Services.IUriHelper UriHelper;
+<div>
+    @if (ad == null)
+    {
+        for (int i = 0; i < 22; i++)
+        {
+            <br />
+        }
+        <wait />
+    }
+    else
+    {
+        if (ad.ID == Guid.Empty)
+        {
+            <h1>404 Not Found!!!</h1>
+            for (int i = 0; i < 22; i++)
+            {
+                <br />
+            }
+        }
+        else
+        {
+            <h1>@ad.Car.CarName</h1>
+            <hr />
+            var pathh = new List<string>();
+            if (ad.Images.Count != 0)
+            {
+                foreach (var item in ad.Images)
+                {
+                    pathh.Add($"data:image/jpg;base64,{item.Value}");
+                }
+            }
+            else
+            {
+                pathh.Clear();
+                pathh.Add("../img/no-image.png");
+            }
+            /**/
+            <div style="height:400px">
+                <div class="slider">
+                    <div class="slide_viewer">
+                        <div class="slide_group">
+                            @foreach (var item in pathh)
+                            {
+                                <div class="slide">
+                                    <img src="@item" style="height:320px;width:99%" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <center><div class="slide_buttons"></div></center>
+                <div class="directional_nav">
+                    <div class="previous_btn" title="Previous">
+                        <img src="../img/arrowprev.svg" />
+                    </div>
+                    <div class="next_btn" title="Next">
+                        <img src="../img/arrownext.svg" />
+                    </div>
+                </div>
+            </div>
+            /**/
+            <hr />
+            <div style="float:left">
+                <i style="font-size:24px"><b>Car info....</b></i>
+            </div>
+            <div style="float:right">
+                <img src="../img/Mail.svg" style="width:45px;height:45px;cursor:pointer" title="Share" onclick="@SendMail"/>
+            </div>
+            <br />
+            <hr />
+            <div class="row">
+                <div class="col-md-6">
+                    <div>
+                        <strong style="float:left">Brand:</strong>
+                        <text style="float:right">@ad.Car.Brand.Name</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Class:</strong>
+                        <text style="float:right">@ad.Car.CarClass.ToString()</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Fuel Type:</strong>
+                        <text style="float:right">@ad.Car.Fuel.ToString()</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Gearbox Type:</strong>
+                        <text style="float:right">@ad.Car.Gearbox.ToString()</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Color:</strong>
+                        <div style="float:right">
+                            <div class="CarColorPreViewTable" style="background-color:@ad.Color.Code"></div>
+                            <text style="float:right">@ad.Color.Color</text>
+                        </div>
+                    </div>
+                    <br />
+                    <hr />
+                </div>
+                <div class="col-md-6">
+                    @if (ad.FirstHanded)
+                    {
+                        <div>
+                            <strong style="float:left">First Handed:</strong>
+                            <text style="float:right">Yes</text>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <strong style="float:left">Distance Traveled:</strong>
+                            <text style="float:right">@ad.KM</text>
+                        </div>
+                    }
+                    <br />
+                    <div>
+                        <strong style="float:left">Insurance:</strong>
+                        @if (!ad.Insurance)
+                        {
+                            <div style="float:right"><text>No</text></div>
+                        }
+                        else
+                        {
+                            <div style="float:right"><text>Exp at: @(((DateTime)ad.InsuranceExpirationDate).ToString("MMMM-dd-yyyy"))</text></div>
+                        }
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">TechnicalInspection:</strong>
+                        <text style="float:right">@(ad.TechnicalInspection ? "Yes" : "No")</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Instalment Payment:</strong>
+                        <text style="float:right">@(ad.PlanedPayment ? "Yes" : "No")</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Price:</strong>
+                        @if (!ad.PlanedPayment)
+                        {
+                            <div style="float:right"><text>@ad.Price</text></div>
+                        }
+                        else
+                        {
+                            <div style="float:right"><text>@ad.AdvancedPayment in Adv and @ad.InstallmentsCount * @ad.InstallmentsPayment</text></div>
+                        }
+                    </div>
+                    <br />
+                    <hr />
+                </div>
+                <div class="col-md-12">
+                    <div style="float:left">
+                        <i style="font-size:24px"><b>Owner info....</b></i>
+                    </div>
+                    <div style="float:right">
+                    </div>
+                    <br />
+                    <hr />
+                    <div>
+                        <strong style="float:left">Name:</strong>
+                        <text style="float:right">@ad.Owner.Name  @ad.Owner.LastName</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Email Address:</strong>
+                        <text style="float:right">@ad.Owner.Email</text>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Phone:</strong>
+                        <div style="float:right;">
+                            <text style="border-bottom:1px solid black;cursor:pointer;color:#1919F0" onclick="@ShowPhone">@(fullphone ? ad.Owner.PhoneNumber : $"{ad.Owner.PhoneNumber.Substring(0, 4)}...{ad.Owner.PhoneNumber.Substring(7)}")</text>
+                        </div>
+                    </div>
+                    <br />
+                    <div>
+                        <strong style="float:left">Address:</strong>
+                        <text style="float:right">@ad.Address , @ad.Owner.City.Name</text>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@functions{
+    [Parameter]
+    string name { get; set; }
+    Ad ad;
+    bool fullphone = false;
+    protected async override Task OnInitAsync()
+    {
+        if (string.IsNullOrEmpty(name)) UriHelper.NavigateTo("/");
+        name = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(name));
+        if (!Guid.TryParse(name, out var V)) UriHelper.NavigateTo("/");
+        ad = await Http.GetJsonAsync<Ad>("api/Car/Detailes/" + name);
+        if (ad.ID == Guid.Empty) Toast("Not Found!!!", ToastType.Error);
+    }
+    protected override void OnAfterRender() => RegisteredFunction.Invoke<bool>("InitSlider");
+    void ShowPhone() => fullphone = !fullphone;
+    async Task SendMail()
+    {
+        var VMV = new MailViewModel();
+        var mail= RegisteredFunction.Invoke<string>("Prompt");
+        if (string.IsNullOrEmpty(mail)) Toast("No mail Address", ToastType.Error);
+        else
+        {
+            VMV.Address = mail;
+            VMV.Uri = UriHelper.GetAbsoluteUri();
+            await Http.SendJsonAsync(HttpMethod.Post, "api/Email/Mail", VMV);
+            Toast("Your message have been sent.",ToastType.Sucess);
+        }
+    }
+}

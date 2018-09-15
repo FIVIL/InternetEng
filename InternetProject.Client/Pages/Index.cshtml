@@ -1,0 +1,124 @@
+﻿@page "/"
+@using InternetProject.Models;
+@using static InternetProject.Client.Statics;
+@inject Microsoft.AspNetCore.Blazor.Services.IUriHelper UriHelper;
+@inject HttpClient Http;
+<h1>
+    <i>Asayesh Khodro...</i>
+</h1>
+<hr>
+@{
+    if (Brands == null)
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            <br />
+        }
+        <wait />
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Photo Grid -->
+                <div class="row">
+                    @{
+                        for (int i = 0; i < Brands.Count(); i += 3)
+                        {
+                            <div class="column">
+                                @for (int j = 0; j < 3; j++)
+                                {
+                                    var path = $"../img/car logos/{Brands[i + j].ImgPath}.png";
+                                    var PathValue = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes($"00;{Brands[i + j].ID};{Brands[i + j].Name};{Brands[i + j].ImgPath}"));
+                                    <a href="/Search/@PathValue">
+                                        <img src=@path style="width:100%" class="gridimg" title="@Brands[i+j].Name">
+                                    </a>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="col-md-4">
+                @if (NewAds.Count == 0)
+                {
+                    <br />
+                    <br />
+                    <center>
+                        <strong>No new Ads to Show!!!</strong>
+                    </center>
+                }
+                else
+                {
+                    <center>
+                        <strong>New Ads:</strong>
+                    </center>
+                    <hr />
+                    <div class="row">
+                        @foreach (var item in NewAds)
+                        {
+                            var pathh = string.Empty;
+                            if (item.Images.Count != 0)
+                            {
+                                pathh = $"data:image/jpg;base64,{item.Images.ElementAt(0).Value}";
+                            }
+                            else
+                            { pathh = "../img/no-image.png"; }
+                            var hrefValue = $"/AdDetailes/{ToBase64(item.ID)}";
+                            <a href="@hrefValue">
+                                <div class="SearchResultItem">
+                                    <div class="innerSearch row">
+                                        <div class="col-md-4">
+                                            <img src="@pathh" class="SearchImageCar" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <small class="SearchLeft">Name:</small>
+                                            <small class="SearchRight">@item.Car.CarName</small>
+                                            <br />
+                                            <small class="SearchLeft">Brand:</small>
+                                            @{ var path = $"../img/car logos/{item.Car.Brand.ImgPath}.png";}
+                                            <div class="SearchRight">
+                                                <img src="@path" class="CarImagePreview" />
+                                                <small style="float:right">@item.Car.Brand.Name</small>
+                                            </div>
+                                            <br />
+                                            <small class="SearchLeft">Distance Traveled:</small>
+                                            <small class="SearchRight">@item.KM</small>
+                                            <br />
+                                            <small class="SearchLeft">Color:</small>
+                                            <div class="SearchRight">
+                                                <div class="CarColorPreView" style="background-color:@item.Color.Code"></div>
+                                                <small style="float:right">@item.Color.Color</small>
+                                            </div>
+                                            <br />
+                                            <small class="SearchLeft">Price:</small>
+                                            <small class="SearchRight">@item.Price</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    }
+}
+@functions{
+    IList<CarBrand> Brands;
+    IList<Ad> NewAds = new List<Ad>();
+    protected override async Task OnInitAsync()
+    {
+        if (Brands == null)
+        {
+            Brands = await Http.GetBrands();
+        }
+        if (NewAds.Count == 0)
+        {
+            NewAds = await Http.GetJsonAsync<IList<Ad>>("api/Car/Today");
+            if (NewAds.Count > 0) Toast(NewAds.Count + " New Ads To Show!!!", ToastType.Sucess);
+            else Toast("No New Ads To Show!!!", ToastType.Error);
+        }
+    }
+}

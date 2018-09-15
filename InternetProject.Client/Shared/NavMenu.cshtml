@@ -1,0 +1,60 @@
+﻿@using static InternetProject.Client.Statics;
+<div class="top-row pl-4 navbar navbar-dark">
+    @*<a class="navbar-brand" href="">InternetProject</a>*@
+    <div>@ChildContent</div>
+    <button class="navbar-toggler" onclick=@ToggleNavMenu>
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class=@(collapseNavMenu ? "collapse" : null) onclick=@ToggleNavMenu>
+    <ul class="nav flex-column">
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match=NavLinkMatch.All>
+                <span class="oi oi-home" aria-hidden="true"></span> Home
+            </NavLink>
+        </li>
+        @if (IsAdmin)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="admin">
+                    <span class="oi oi-key" aria-hidden="true"></span> Admin Panel
+                </NavLink>
+            </li>
+        }
+        <li class="nav-item px-3">
+            <NavLink class="nav-link" href="Search">
+                <span class="oi oi-magnifying-glass" aria-hidden="true"></span> Search
+            </NavLink>
+        </li>
+        @if (IsLogin)
+        {
+            <li class="nav-item px-3">
+                <NavLink class="nav-link" href="add">
+                    <span class="oi oi-plus" aria-hidden="true"></span> New Ad
+                </NavLink>
+            </li>
+        }
+        @*<li class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="oi oi-plus" aria-hidden="true"></span> Counter
+            </NavLink>
+        </li>*@
+    </ul>
+    <div class="kntu">
+        <img src="../img/K._N._Toosi_University_of_Technology.png" class="imgsize" />
+        <small class="kntutext">K. N. Toosi University of Technology</small>
+    </div>
+</div>
+
+@functions {
+    bool collapseNavMenu = true;
+
+    [Parameter]
+    private RenderFragment ChildContent { get; set; }
+
+    void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

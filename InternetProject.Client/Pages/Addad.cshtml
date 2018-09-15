@@ -1,0 +1,386 @@
+﻿@page "/add"
+@using Microsoft.AspNetCore.Blazor.Browser.Interop;
+@using InternetProject.Shared;
+@using InternetProject.Models;
+@using static InternetProject.Client.Statics;
+@inject HttpClient Http
+@inject Microsoft.AspNetCore.Blazor.Services.IUriHelper UriHelper;
+<h1><i>New Car...</i></h1>
+<hr />
+<div>
+    <div class="row">
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="brand">Brand:</label>
+                <br />
+                <select name="brand" class="SearchInput" bind="@BrandID" onclick="@GetBrands">
+                    @if (Brands == null)
+                    {
+                        <option value="@Guid.Empty">----Select----</option>
+                    }
+                    else
+                    {
+                        <option value="@Guid.Empty">----Select----</option>
+                        foreach (var item in Brands)
+                        {
+                            <option value="@item.ID">@item.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="CarName">Name:</label>
+                <br />
+                <input type="text" bind="@carName" name="CarName" class="SearchInput" />
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="fueltype">Fuel:</label>
+                <br />
+                <select name="fueltype" class="SearchInput" bind="@fueltype">
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(FuelType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="Gbox">Gear Box:</label>
+                <br />
+                <select name="Gbox" class="SearchInput" bind="@gbox">
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(GearboxType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <!-- -->
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="CClass">Class:</label>
+                <br />
+                <select name="CClass" class="SearchInput" bind="@carcalss">
+                    @{ index = 0;}
+                    @foreach (var item in Enum.GetValues(typeof(CarClassType)))
+                    {
+                        <option value="@index">@item</option>
+                        index++;
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="FHAnded">First Handed:</label>
+                <br />
+                <select name="FHAnded" class="SearchInput" bind="@fh">
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="KMM">Distance Traveled:</label>
+                <br />
+                <input type="number" step="0.01" name="KMM" class="SearchInput" bind="@km" />
+            </div>
+        </div>
+        <!-- -->
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="brand">Color:</label>
+                <br />
+                <select name="brand" class="SearchInput" bind="@ColorID" onclick="@GetColors">
+                    @if (Colors == null)
+                    {
+                        <option value="@Guid.Empty">----Select----</option>
+                    }
+                    else
+                    {
+                        <option value="@Guid.Empty">----Select----</option>
+                        foreach (var item in Colors)
+                        {
+                            <option value="@item.ID">@item.Color</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="mandat">Manufacturing Date:</label>
+                <br />
+                <input type="date" name="mandat" class="SearchInput" min="1970-01-01" max="@DateTime.Now.Date" value="@DateTime.Now.AddDays(2).Date" bind="@ManDate" />
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="Insurance">Insurance:</label>
+                <br />
+                <select name="Insurance" class="SearchInput" bind="@Insurance">
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        @if (Insurance == 0)
+        {
+            <div class="col-md-3 SearchBox">
+                <div>
+                    <label for="indate">Insurance Expiration Date:</label>
+                    <br />
+                    <input type="date" name="indate" class="SearchInput" max="@DateTime.Now.AddYears(2).Date" min="@DateTime.Now.Date" value="@DateTime.Now.AddDays(2).Date" bind="@IED" />
+                </div>
+            </div>
+        }
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="TechnicalInspection">TechnicalInspection:</label>
+                <br />
+                <select name="TechnicalInspection" class="SearchInput" bind="@TechnicalInspection">
+                    <option value="0">Yes</option>
+                    <option value="1">No</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="PlanedPayment">PlanedPayment:</label>
+                <br />
+                <select name="PlanedPayment" class="SearchInput" bind="@PlanedPayment">
+                    <option value="0">No</option>
+                    <option value="1">Yes</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="TotalPrice">Total Price:</label>
+                <br />
+                <input type="number" step="0.01" name="TotalPrice" class="SearchInput" bind="@TotalPrice" />
+            </div>
+        </div>
+        @if (PlanedPayment == 1)
+        {
+            <div class="col-md-3 SearchBox">
+                <div>
+                    <label for="Prepay">Advanced Payment:</label>
+                    <br />
+                    <input type="number" step="0.01" name="Prepay" class="SearchInput" bind="@AdvancedPayment" />
+                </div>
+            </div>
+            <div class="col-md-3 SearchBox">
+                <div>
+                    <label for="InstallmentsPayment">Installments Payment:</label>
+                    <br />
+                    <input type="number" step="0.01" name="InstallmentsPayment" class="SearchInput" bind="@InstallmentsPayment" />
+                </div>
+            </div>
+            <div class="col-md-3 SearchBox">
+                <div>
+                    <label for="InstallmentsCount">Installments Count:</label>
+                    <br />
+                    <input type="number" name="InstallmentsCount" class="SearchInput" bind="@InstallmentsCount" />
+                </div>
+            </div>
+        }
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="address">Address:</label>
+                <br />
+                <input type="text" bind="@address" name="address" class="SearchInput" />
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <label for="File">Images:</label>
+                <br />
+                <input type="file" name="File" class="SearchInput" id="fille" multiple />
+            </div>
+        </div>
+        <div class="col-md-3 SearchBox">
+            <div>
+                <br />
+                <button onclick="@Upload" class="Searchbutton" style="float:right">Upload</button>
+            </div>
+        </div>
+    </div>
+    <br />
+    <center>
+        <div id="g-recaptcha" class="g-recaptcha"></div>
+        <br />
+        <button onclick="@File" class="Searchbuttoncenter">Save</button>
+    </center>
+</div>
+@functions{
+    string Token;
+    IList<CarBrand> Brands;
+    IList<CarColor> Colors;
+    Guid _brandId = Guid.Empty;
+    string BrandID { get => _brandId.ToString(); set => _brandId = Guid.Parse(value); }
+    Guid _colorId = Guid.Empty;
+    string ColorID { get => _colorId.ToString(); set => _colorId = Guid.Parse(value); }
+    string carName = string.Empty;
+    int index = 0;
+    int fueltype = 0;
+    int carcalss = 0;
+    int gbox = 0;
+    int fh = -100;
+    double km = 0;
+    string ManDate;
+    int Insurance = 1;
+    string IED;
+    int TechnicalInspection = 1;
+    int PlanedPayment = 0;
+    double TotalPrice = 0;
+    double AdvancedPayment = 0;
+    double InstallmentsPayment = 0;
+    int InstallmentsCount = 0;
+    string address;
+    protected override void OnInit()
+    {
+        if (!IsLogin) UriHelper.NavigateTo("/");
+        Token = GetCookie();
+    }
+    async Task GetBrands()
+    {
+        if (Brands == null)
+        {
+            Brands = await Http.GetBrands();
+        }
+    }
+    async Task GetColors()
+    {
+        if (Colors == null)
+        {
+            Colors = await Http.GetJsonAsync<IList<CarColor>>("api/Car/Colors");
+        }
+    }
+    string ffile = "file";
+    string rec = string.Empty;
+    async Task File()
+    {
+        if (_brandId == Guid.Empty)
+        {
+            Toast("Brand must be specified!!!", ToastType.Warning);
+            return;
+        }
+        if (string.IsNullOrEmpty(carName))
+        {
+            Toast("Car name must be specified!!!", ToastType.Warning);
+            return;
+        }
+        if (_colorId == Guid.Empty)
+        {
+            Toast("Color must be specified!!!", ToastType.Warning);
+            return;
+        }
+        if (string.IsNullOrEmpty(ManDate) || !DateTime.TryParse(ManDate, out var MD))
+        {
+            Toast("Manufacturing Date must be specified!!!", ToastType.Warning);
+            return;
+        }
+        if (Insurance == 0)
+        {
+            if (string.IsNullOrEmpty(IED) || !DateTime.TryParse(IED, out var ieddd))
+            {
+                Toast("Insurance Expiration Date must be specified!!!", ToastType.Warning);
+                return;
+            }
+        }
+        var ad = new Ad()
+        {
+            Address = address,
+            AdTime = DateTime.Now,
+            Car = new CarType()
+            {
+                BrandID = _brandId,
+                CarClass = (CarClassType)carcalss,
+                CarName = carName,
+                Fuel = (FuelType)fueltype,
+                Gearbox = (GearboxType)gbox
+            },
+            ColorID = _colorId,
+            Expired = false,
+            FirstHanded = (fh == 0) ? true : false,
+            Insurance = (Insurance == 0) ? true : false,
+            KM = km,
+            ManufacturingDate = MD,
+            OwnerID = Guid.Parse(GetCookie()),
+            PlanedPayment = (PlanedPayment == 1) ? true : false,
+            Price = TotalPrice,
+            Verified = false,
+            TechnicalInspection = (TechnicalInspection == 0) ? true : false
+
+        };
+        if (Insurance == 0) ad.InsuranceExpirationDate = DateTime.Parse(IED);
+        if (PlanedPayment == 1)
+        {
+            ad.AdvancedPayment = AdvancedPayment;
+            ad.InstallmentsCount = InstallmentsCount;
+            ad.InstallmentsPayment = InstallmentsPayment;
+        }
+        if (reses != "em")
+        {
+            var imgs = reses.Split(';').Where(x => !string.IsNullOrEmpty(x)).ToList();
+            List<Image> ims = new List<Image>();
+            foreach (var item in imgs)
+            {
+                var img = new Image()
+                {
+                    Name = item
+                };
+                ims.Add(img);
+            }
+            ad.Images = ims;
+        }
+        if (string.IsNullOrEmpty(rec))
+        {
+            rec = RegisteredFunction.Invoke<string>("recaptchaValue");
+            if (string.IsNullOrWhiteSpace(rec))
+            {
+                Toast("recaptcha", ToastType.Error);
+                return;
+            }
+        }
+        ad.Recaptcha = rec;
+        //Http.DefaultRequestHeaders.Add("file", ffile);
+        var res = await Http.SendJsonAsync<CheckSessionResult>(HttpMethod.Post, "api/Car/newcar", ad);
+        if (!res.res)
+        {
+            if (res.Name == "WR") Toast("recaptcha !!!", ToastType.Error);
+            else Toast("sth went wrong :(", ToastType.Error);
+        }
+        else UriHelper.NavigateTo("/AdDetailes/" + ToBase64(Guid.Parse(res.Name)));
+    }
+    string reses = "em";
+    async Task Upload()
+    {
+        ffile = RegisteredFunction.Invoke<string>("GetFile");
+        var req = new HttpRequestMessage();
+        req.RequestUri = new Uri("/upload");
+        req.Method = HttpMethod.Post;
+        req.Content = new StringContent(ffile);
+        var p = await Http.SendAsync(req);
+        reses = p.Headers.First(x => x.Key == "file").Value.First();
+    }
+    bool rendered = false;
+    protected override void OnAfterRender()
+    {
+        if (rendered) return;
+        RegisteredFunction.Invoke<string>("InitFile", "fille");
+        RegisteredFunction.Invoke<string>("recaptcha");
+        rendered = true;
+    }
+}

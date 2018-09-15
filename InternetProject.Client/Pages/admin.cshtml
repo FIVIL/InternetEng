@@ -1,0 +1,93 @@
+﻿@page "/admin";
+@using static InternetProject.Client.Statics;
+@using InternetProject.Models;
+@using static InternetProject.Client.Statics;
+@inject HttpClient Http;
+@inject Microsoft.AspNetCore.Blazor.Services.IUriHelper UriHelper;
+
+<h1>Admin</h1>
+<hr />
+<div>
+    @if (Ads == null)
+    {
+        <br />
+        <br />
+        <center>
+            <strong>No new Ads to Show!!!</strong>
+        </center>
+    }
+    else
+    {
+        <center>
+            <strong>New Ads:</strong>
+        </center>
+        <hr />
+        <div class="row">
+            @foreach (var item in Ads)
+            {
+                var pathh = string.Empty;
+                if (item.Images.Count != 0)
+                {
+                    //var t = Http.DownloadImageAsync(item.Images.ElementAt(0).Name);
+                    pathh = $"data:image/jpg;base64,{item.Images.ElementAt(0).Value}";
+                }
+                else
+                { pathh = "../img/no-image.png"; }
+                var hrefValue = $"/AdDetailes/{ToBase64(item.ID)}";
+                <div onclick="@(()=>item.Verified=!item.Verified)" class="col-md-4">
+                    <div class="@(item.Verified?"AdminTrue":"AdminFalse")">
+                        <div class="innerSearch row">
+                            <div class="col-md-4">
+                                <img src="@pathh" class="SearchImageCar" />
+                            </div>
+                            <div class="col-md-8">
+                                <small class="SearchLeft">Name:</small>
+                                <small class="SearchRight">@item.Car.CarName</small>
+                                <br />
+                                <small class="SearchLeft">Brand:</small>
+                                @{ var path = $"../img/car logos/{item.Car.Brand.ImgPath}.png";}
+                                <div class="SearchRight">
+                                    <img src="@path" class="CarImagePreview" />
+                                    <small style="float:right">@item.Car.Brand.Name</small>
+                                </div>
+                                <br />
+                                <small class="SearchLeft">Distance Traveled:</small>
+                                <small class="SearchRight">@item.KM</small>
+                                <br />
+                                <small class="SearchLeft">Color:</small>
+                                <div class="SearchRight">
+                                    <div class="CarColorPreView" style="background-color:@item.Color.Code"></div>
+                                    <small style="float:right">@item.Color.Color</small>
+                                </div>
+                                <br />
+                                <small class="SearchLeft">Price:</small>
+                                <small class="SearchRight">@item.Price</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+<hr />
+<div style="float:right">
+    <button onclick="@SendResultAsync" class="Searchbutton" value="Verify">Verify</button>
+</div>
+@functions{
+    IList<Ad> Ads;
+    protected async override Task OnInitAsync()
+    {
+        if (!IsAdmin) UriHelper.NavigateTo("/");
+        else Toast("Admin Page", ToastType.Warning);
+        Http.DefaultRequestHeaders.Clear();
+        Http.DefaultRequestHeaders.Add("AdminToken", Token.ToString());
+        Ads = await Http.GetJsonAsync<IList<Ad>>("api/Car/Verify");
+    }
+    async Task SendResultAsync()
+    {
+        var temp = Ads;
+        Ads = null;
+        Ads = await Http.SendJsonAsync<IList<Ad>>(HttpMethod.Post, "api/Car/VerifyResult", temp);
+    }
+}
